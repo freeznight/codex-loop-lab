@@ -3,7 +3,41 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
+
+
+class _ChineseHelpFormatter(argparse.HelpFormatter):
+    def add_usage(self, usage, actions, groups, prefix=None):
+        if prefix is None:
+            prefix = "用法: "
+        super().add_usage(usage, actions, groups, prefix)
+
+
+class _ChineseArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("add_help", False)
+        kwargs.setdefault("formatter_class", _ChineseHelpFormatter)
+        super().__init__(*args, **kwargs)
+        self.add_argument("-h", "--help", action="help", help="显示帮助信息并退出")
+        self._positionals.title = "位置参数"
+        self._optionals.title = "选项"
+
+    def error(self, message: str) -> None:
+        translations = (
+            (r"^the following arguments are required: (.+)$", r"缺少必需参数: \1"),
+            (
+                r"^argument (.+): invalid choice: (.+) \(choose from (.+)\)$",
+                r"参数 \1: 无效选项: \2（可选值: \3）",
+            ),
+            (r"^unrecognized arguments: (.+)$", r"无法识别的参数: \1"),
+        )
+        for pattern, replacement in translations:
+            if re.match(pattern, message):
+                message = re.sub(pattern, replacement, message)
+                break
+        self.print_usage()
+        self.exit(2, f"{self.prog}: 错误: {message}\n")
 
 
 def _data_path() -> Path:
@@ -46,8 +80,10 @@ def _list_tasks() -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="命令行 Todo 列表")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser = _ChineseArgumentParser(description="命令行 Todo 列表")
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, metavar="命令"
+    )
 
     add_parser = subparsers.add_parser("add", help="新增任务")
     add_parser.add_argument("title", help="任务标题")

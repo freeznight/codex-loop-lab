@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 import tasklist
 
 
@@ -46,3 +48,19 @@ def test_list_reports_empty_data_file(monkeypatch, tmp_path, capsys):
     assert tasklist.main(["list"]) == 0
 
     assert capsys.readouterr().out == "暂无任务\n"
+
+
+@pytest.mark.parametrize(
+    "arguments", [["--help"], [], ["unknown"], ["add", "--help"], ["add"]]
+)
+def test_argparse_output_is_chinese(arguments, capsys):
+    with pytest.raises(SystemExit):
+        tasklist.main(arguments)
+
+    output = capsys.readouterr()
+    text = output.out + output.err
+    assert any(word in text for word in ("用法", "位置参数", "错误"))
+    assert not any(
+        word in text
+        for word in ("usage:", "positional arguments", "options:", "error:")
+    )
