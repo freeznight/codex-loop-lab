@@ -89,7 +89,16 @@ def test_list_reports_empty_data_file(monkeypatch, tmp_path, capsys):
 
 
 @pytest.mark.parametrize(
-    "arguments", [["--help"], [], ["unknown"], ["add", "--help"], ["add"]]
+    "arguments",
+    [
+        ["--help"],
+        ["--help=foo"],
+        [],
+        ["unknown"],
+        ["add", "--help"],
+        ["add", "--help=foo"],
+        ["add"],
+    ],
 )
 def test_argparse_output_is_chinese(arguments, capsys):
     with pytest.raises(SystemExit):
@@ -100,5 +109,11 @@ def test_argparse_output_is_chinese(arguments, capsys):
     assert any(word in text for word in ("用法", "位置参数", "错误"))
     assert not any(
         word in text
-        for word in ("usage:", "positional arguments", "options:", "error:")
+        for word in (
+            "usage:",
+            "positional arguments",
+            "options:",
+            "error:",
+            "ignored explicit argument",
+        )
     )

@@ -30,6 +30,10 @@ class _ChineseArgumentParser(argparse.ArgumentParser):
                 r"^argument (.+): invalid choice: (.+) \(choose from (.+)\)$",
                 r"参数 \1: 无效选项: \2（可选值: \3）",
             ),
+            (
+                r"^argument (.+): ignored explicit argument (.+)$",
+                r"参数 \1: 不接受显式参数 \2",
+            ),
             (r"^unrecognized arguments: (.+)$", r"无法识别的参数: \1"),
         )
         for pattern, replacement in translations:
