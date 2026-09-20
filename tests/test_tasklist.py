@@ -1,8 +1,46 @@
 import json
+import os
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
 import tasklist
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_module_runs_from_repository_root_without_pythonpath(tmp_path):
+    data_file = tmp_path / "tasks.json"
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    env["TASKLIST_DATA_FILE"] = str(data_file)
+
+    added = subprocess.run(
+        [sys.executable, "-m", "tasklist", "add", "买牛奶"],
+        cwd=PROJECT_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    listed = subprocess.run(
+        [sys.executable, "-m", "tasklist", "list"],
+        cwd=PROJECT_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert added.returncode == 0
+    assert added.stdout == "已添加任务 1: 买牛奶\n"
+    assert added.stderr == ""
+    assert listed.returncode == 0
+    assert listed.stdout == "1. [ ] 买牛奶\n"
+    assert listed.stderr == ""
 
 
 def test_add_persists_tasks_and_increments_ids(monkeypatch, tmp_path, capsys):
