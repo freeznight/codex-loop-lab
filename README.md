@@ -19,4 +19,12 @@ python -m tasklist add "买牛奶"
 python -m tasklist list
 ```
 
-从源码目录直接运行时，可先将 `src` 加入 `PYTHONPATH`。测试使用临时数据文件，不会污染用户真实数据文件。
+以上命令可直接在仓库根目录运行，无需设置 `PYTHONPATH`。测试使用临时数据文件，不会污染用户真实数据文件。
+
+## 运行测试
+
+在仓库根目录执行：
+
+```text
+pytest -q
+```
